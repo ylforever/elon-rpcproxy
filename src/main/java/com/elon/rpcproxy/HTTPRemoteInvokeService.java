@@ -1,5 +1,6 @@
 package com.elon.rpcproxy;
 
+import com.elon.model.Result;
 import com.google.common.base.Joiner;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class HTTPRemoteInvokeService {
      * @return 返回值
      * @author elon
      */
-    public String requestGet(String url, Map<String, String> headerMap, Map<String, Object> requestParamMap){
+    public <T> Result<T> requestGet(String url, Map<String, String> headerMap, Map<String, Object> requestParamMap){
         HttpHeaders httpHeaders = new HttpHeaders();
         headerMap.forEach(httpHeaders::add);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -45,12 +46,12 @@ public class HTTPRemoteInvokeService {
         sb.append(url);
 
         List<String> paramList = new ArrayList<>();
-        requestParamMap.forEach((key, value)->paramList.add(key + "=" + String.valueOf(value)));
+        requestParamMap.forEach((key, value)->paramList.add(key + "=" + value));
         if (!paramList.isEmpty()) {
             sb.append("?").append(Joiner.on("&").join(paramList));
         }
-        ResponseEntity<String> result = restTemplate.exchange(sb.toString(), HttpMethod.GET, null,
-                new ParameterizedTypeReference<String>() {});
+        ResponseEntity<Result<T>> result = restTemplate.exchange(sb.toString(), HttpMethod.GET, null,
+                new ParameterizedTypeReference<Result<T>>() {});
         return result.getBody();
     }
 }
